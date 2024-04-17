@@ -1,0 +1,272 @@
+User
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Budget Tracker | CodingNepal</title>
+  <style>
+    /* Your CSS styles here */
+    * {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    
+    body {
+      min-height: 1000px;
+      display: flex;
+      flex-direction: column;
+      background-color: rgb(74, 154, 119);
+      color: black;
+    }
+    
+    .headerBar {
+      background-color:  #009579;
+      color: bisque;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .title {
+      margin-bottom: 20px;
+      color: white;
+    }
+    
+    .topbar {
+      margin-bottom: 10px;
+    }
+    
+    .currency {
+      font-size: 30px;
+      font-weight: 300;
+    }
+    
+    .balance {
+      font-size: 30px;
+      font-weight: 300;
+    }
+    
+    .content {
+      width: 580px;
+      margin: 0 auto;
+      padding: 3%;
+      padding-left: 6%;
+    }
+    
+    .secondTitle {
+      background-color: #009579;
+      color: white;
+      text-align: center;
+      margin-top: 100px;
+      padding: 20px;
+      font-size: 25px;
+    }
+    
+    .form {
+      padding: 5px;
+      padding-top: 20px;
+      padding-left: 10%;
+      justify-content: center;
+      background-color: bisque;
+    }
+    
+    .formLine {
+      display: inline-flex;
+      padding: 5px 0px;
+    }
+    
+    .left {
+      float: left;
+    }
+    
+    .right {
+      float: right;
+      margin-right: 100px;
+    }
+    
+    input,
+    select {
+      width: 130px;
+      margin-left: 10px;
+    }
+    
+    /* table style */
+    table {
+      width: 100%;
+    }
+    
+    thead {
+      background-color: #009579;
+      color: white;
+      line-height: 30px;
+    }
+    
+    tbody {
+      background-color: bisque;
+      line-height: 30px;
+      text-align: center;
+    }
+    
+    /* Button */
+    
+    button {
+      width: 200px;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+      font-size: 1.1em;
+      line-height: 20px;
+      background-color:#009579;
+      border-radius: 5px;
+      margin: 14px 25%;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      box-shadow: 0 0 0 2px grey;
+      transition: 0.5s;
+    }
+    
+    a {
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+    <div class="headerBar">
+        <header>
+        
+          <h1 class="title">My Budget Tracker</h1>
+          <h2 class="topbar">Your Current Balance</h2>
+          <p>
+            <span class="currency">$</span>
+            <span class="balance"></span>
+          </p>
+          <button onclick="logout()" class="buttonLogout">Logout</button>
+
+          <header>
+      </div>
+      <div class="content">
+        <h3 class="secondTitle">Add a new transaction: </h3>
+        <div class="form">
+          <form id="expForm">
+            <div class="formLine left">
+              <span for="type">Type:</span>
+              <select id="type">
+                <option value="chooseOne">Choose one...</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+            <div class="formLine right">
+              <span for="name">Name:</span>
+              <input type="text" id="name">
+            </div>
+    
+            <div class="formLine right">
+              <span for="amount">Amount:</span>
+              <input type="text" id="amount">
+            </div>
+            <button type="submit" class="buttonSave">Add to transactions</button>
+          </form>
+        </div>
+      </div>
+      <div class="content">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Name</th>
+              <th>Amount</th>
+              <th>Options</th>
+            </tr>
+          </thead>
+          <tbody id="transactionTable"></tbody>
+        </table>
+      </div>
+  <!-- No need to include separate script.js file here if the JavaScript is inline -->
+  <script>
+    // Your JavaScript code here
+    // You can include inline JavaScript here
+    document.getElementById('expForm').addEventListener('submit', addTransaction);
+// initial array of transactions, reading from localStorage
+const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+function addTransaction(e) {
+    e.preventDefault();
+  
+    // get type, name, and amount
+    let type = document.getElementById('type').value;
+    let name = document.getElementById('name').value;
+    let amount = document.getElementById('amount').value;
+  
+    if (type != 'chooseOne'
+      && name.length > 0
+      && amount > 0) {
+      const transaction = {
+        type,
+        name,
+        amount,
+        id: transactions.length > 0 ? transactions[transactions.length - 1].id + 1 : 1,
+      }
+  
+      transactions.push(transaction);
+      // localStorage 
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+    }
+  
+    document.getElementById('expForm').reset();
+    showTransactions();
+    updateBalance();
+  }
+  
+  const showTransactions = () => {
+  
+    const transactionTable = document.getElementById('transactionTable');
+  
+    transactionTable.innerHTML = '';
+  
+    for (let i = 0; i < transactions.length; i++) {
+      transactionTable.innerHTML += `
+            <tr>
+                <td>${transactions[i].type}</td>
+                <td>${transactions[i].name}</td>
+                <td>$${transactions[i].amount}</td>
+                <td><a class="deleteButton" onclick="deleteTransaction(${transactions[i].id})">
+                    Delete</td>
+            </tr>
+        `;
+    }
+  }
+  const deleteTransaction = (id) => {
+    for (let i = 0; i < transactions.length; i++) {
+      if (transactions[i].id == id) {
+        transactions.splice(i, 1);
+      }
+    }
+  
+    // localStorage
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+    showTransactions();
+    updateBalance();
+  }
+  const updateBalance = () => {
+    let balance = 0;
+  
+    transactions.forEach((transaction) => {
+      if (transaction.type === "income") {
+        balance += Number(transaction.amount);
+      } else if (transaction.type === "expense") {
+        balance -= transaction.amount;
+      }
+    });
+  
+    document.querySelector(".balance").textContent = balance;
+  }
+  function logout() {
+      // Perform logout actions here
+      alert("Logged out successfully!");
+      // Redirect to the login page
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
